@@ -1,0 +1,1 @@
+# aks-scaling-configure-lab
