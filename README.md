@@ -1,1 +1,1 @@
-# aks-scaling-configure-lab
+# Configure Azure Kubernetes Service (AKS) Scaling
