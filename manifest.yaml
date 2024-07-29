@@ -1,24 +1,34 @@
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
+apiVersion: v1
+kind: Service
 metadata:
-  name: myaksapp-deployment-hpa
+  name: myaksapp-service
+  labels:
+    app: myaksapp
 spec:
-  maxReplicas: 10
-  minReplicas: 1
-  behavior:
-    scaleDown:
-      stabilizationWindowSeconds: 30
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: myaksapp-deployment
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 90
+  selector:
+    app: myaksapp
+  ports:
+   - name: http
+     port: 80
+     targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-config
+data:
+  index.html: |
+            <!doctype html>
+            <html lang="en">
+            <head>
+            <meta charset="utf-8">
+            <title>My AKS App</title>
+            </head>
+            <body>
+            <h1 style="text-align: center">Hello from Azure Kubernetes Service!</h1>
+            </body>
+            </html>
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -49,8 +59,3 @@ spec:
         ports:
         - name: http
           containerPort: 80
-        resources:
-          requests:
-            cpu: 500m
-          limits:
-            cpu: 1000m

@@ -1,0 +1,56 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: myaksapp-deployment-hpa
+spec:
+  maxReplicas: 10
+  minReplicas: 1
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 30
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: myaksapp-deployment
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 90
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myaksapp-deployment
+  labels:
+    app: myaksapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myaksapp
+  template:
+    metadata:
+      labels:
+        app: myaksapp
+    spec:
+      volumes:
+         - name: config-volume
+           configMap:
+             name: web-config
+      containers:
+      - name: myaksapp-con
+        image: nginx:stable
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/nginx/html
+        ports:
+        - name: http
+          containerPort: 80
+        resources:
+          requests:
+            cpu: 500m
+          limits:
+            cpu: 1000m
